@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+	<record id="shipstation_store_tree_view_vts" model="ir.ui.view">
+		<field name="name">Shipstation Store</field>
+		<field name="model">shipstation.store.vts</field>
+		<field name="type">tree</field>
+		<field name="arch" type="xml">
+			<tree>
+				<field name="store_id"/>
+                 <field name="store_name" />
+                 <field name="marketplace_name" />
+                 <field name="acc_number" />
+			</tree>
+		</field>
+	</record>
+    <record id="view_shipstation_store_form_view_vts" model="ir.ui.view">
+        <field name="name">Shipstation Store Form View</field>
+        <field name="model">shipstation.store.vts</field>
+        <field name="type">form</field>
+        <field name="arch" type="xml">
+            <form>                    
+                <sheet>
+                    <group>
+                        <group string="Shipstation Store Info">
+	                            <field name="store_id"/>
+                 				<field name="store_name" />
+                 				<field name="marketplace_id" />
+                 				<field name="marketplace_name" />
+                 				<field name="acc_number" />
+                         </group>
+                    </group>
+                </sheet>
+            </form>
+        </field>
+    </record>
+    <record id="actionid_shipstation_store_vts" model="ir.actions.act_window">
+        <field name="name">Shipstation Store </field>
+        <field name="res_model">shipstation.store.vts</field>
+        <field name='view_type'>form</field>
+        <field name='view_mode'>tree,form</field>
+        <field name="help" type="html">
+            <p class="oe_view_nocontent_create">
+                Click to create a Shipstation Configuration.
+            </p>
+        </field>
+    </record>
+    <menuitem name="Shipstation Store" id="menuitem_shipstation_store_vts"
+              parent="shipstation_odoo_integration_menuitem" action="actionid_shipstation_store_vts"
+              sequence="2"/>
+    </odoo>
