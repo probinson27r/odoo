@@ -81,11 +81,11 @@ class DeliveryCarrier(models.Model):
         ounce_for_kg = 35.274
         grams_for_kg = 1000
         if self.weight_uom == "pounds":
-            total_weight = round(weight * pound_for_kg, 3)
+            total_weight = weight
         elif self.weight_uom == "ounces":
-            total_weight = round(weight * ounce_for_kg, 3)
+            total_weight = weight
         else:
-            total_weight = round(weight * grams_for_kg, 3)
+            total_weight = weight
 
         # https://ssapi.shipstation.com/shipments/getrates
         dict_rate = {
