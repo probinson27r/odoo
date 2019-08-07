@@ -360,5 +360,5 @@ class DeliveryCarrier(models.Model):
             link = "%s"%(picking.carrier_id and picking.carrier_id.shipstation_carrier_id and picking.carrier_id and picking.carrier_id.shipstation_carrier_id.provider_tracking_link)
             if not link:
                 raise ValidationError("Provider Link Is not available")
-            res = '%s %s' % (link, picking.carrier_tracking_ref)
+            res = '%s%s' % (link, picking.carrier_tracking_ref)
         return res
