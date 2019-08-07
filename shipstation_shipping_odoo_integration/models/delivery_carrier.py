@@ -148,11 +148,11 @@ class DeliveryCarrier(models.Model):
         ounce_for_kg = 35.274
         grams_for_kg = 1000
         if self.weight_uom == "pounds":
-            total_weight = round(weight * pound_for_kg, 3)
+            total_weight = weight
         elif self.weight_uom == "ounces":
-            total_weight = round(weight * ounce_for_kg, 3)
+            total_weight = weight
         else:
-            total_weight = round(weight * grams_for_kg, 3)
+            total_weight = weight
         request_data = {
             "carrierCode": "%s" % (
             self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id.code),
@@ -228,11 +228,11 @@ class DeliveryCarrier(models.Model):
         ounce_for_kg = 35.274
         grams_for_kg = 1000
         if self.weight_uom == "pounds":
-            total_weight = round(weight * pound_for_kg, 3)
+            total_weight = weight
         elif self.weight_uom == "ounces":
-            total_weight = round(weight * ounce_for_kg, 3)
+            total_weight = weight
         else:
-            total_weight = round(weight * grams_for_kg, 3)
+            total_weight = weight
         date_order = picking.scheduled_date
         if date_order:
             order_date_formate =datetime.strptime(str(date_order), "%Y-%m-%d %H:%M:%S")
