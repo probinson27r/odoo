@@ -13,7 +13,7 @@
                 <xpath expr="/form/header/button[last()]" position="after">
                     <button type="object" name="update_order_in_shipstation" invisible="1" string="Update Shipstation Order"
                             attrs="{'invisible':[('shipstation_order_id','=',False)]}"/>
-                    <button type="object" name="generate_label_from_shipstation" string="Generate Shipstation Lable" attrs="{'invisible':['|',('delivery_type','=',False),('state','not in',('done'))]}"/>
+                    <button type="object" name="generate_label_from_shipstation" string="Generate Shipstation Label" attrs="{'invisible':['|',('delivery_type','=',False),('state','not in',('done'))]}"/>
                 </xpath>
             </field>
         </record>
