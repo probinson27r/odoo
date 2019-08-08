@@ -41,7 +41,8 @@ class StockPicking(models.Model):
             raise ValidationError("Please set proper delivery method")
         try:
             body=self.carrier_id and self.carrier_id.generate_label_from_shipstation(self)
-            response_data=self.carrier_id and self.carrier_id.api_calling_function("/shipments/createlabel", body)
+            body.update( {"orderId" : self.shipstation_order_id} )
+            response_data=self.carrier_id and self.carrier_id.api_calling_function("/orders/createlabelfororder", body)
             if response_data.status_code == 200:
                 responses = response_data.json()
                 shipment_id = responses.get('shipmentId')
