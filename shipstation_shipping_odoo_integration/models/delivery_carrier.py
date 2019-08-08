@@ -122,7 +122,7 @@ class DeliveryCarrier(models.Model):
                 for response in responses:
                     if self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code == response.get(
                             'serviceCode'):
-                        service_cost = response.get('shipmentCost')
+                        service_cost = response.get('shipmentCost') + response.get('otherCost')
                         return {'success': True, 'price': float(service_cost or 0.0), 'error_message': False,
                                 'warning_message': False}
                     else:
