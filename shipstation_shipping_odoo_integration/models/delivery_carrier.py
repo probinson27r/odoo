@@ -1,6 +1,6 @@
 import base64
 import simplejson as json
-from datetime import datetime
+from datetime import datetime, timedelta, date
 from requests import request
 import time
 from odoo import models, fields, api, _
@@ -11,21 +11,36 @@ import logging
 _logger = logging.getLogger(__name__)
 
 
+def date_by_adding_business_days(add_days):
+    business_days_to_add = add_days
+    current_date = date.today()
+    while business_days_to_add > 0:
+        current_date += timedelta(days=1)
+        weekday = current_date.weekday()
+        if weekday >= 5:  # sunday = 6
+            continue
+        business_days_to_add -= 1
+    return current_date
+
+
 class DeliveryCarrier(models.Model):
     _inherit = "delivery.carrier"
 
-    shipstation_carrier_id = fields.Many2one('shipstation.delivery.carrier', string='Shipstation Carrier')
+    shipstation_carrier_id = fields.Many2one(
+        'shipstation.delivery.carrier', string='Shipstation Carrier')
     shipstation_delivery_carrier_service_id = fields.Many2one('shipstation.delivery.carrier.service',
                                                               string='Shipstation Delivey Carrier Service')
-    delivery_type = fields.Selection(selection_add=[('shipstation', 'Shipstation')])
-    delivery_package_id = fields.Many2one('shipstation.delivery.package', string='Shipstation Package Code')
+    delivery_type = fields.Selection(
+        selection_add=[('shipstation', 'Shipstation')])
+    delivery_package_id = fields.Many2one(
+        'shipstation.delivery.package', string='Shipstation Package Code')
     weight_uom = fields.Selection([('pounds', 'pounds'), ('ounces', 'ounces'), ('grams', 'grams')], default="pounds",
                                   string='Weight UOM')
     shipstation_dimentions = fields.Selection([('inches', 'inches'), ('centimeters', 'centimeters')], default="inches",
                                               string='Shipstation Dimentions')
     confirmation = fields.Selection(
         [('none', 'None'), ('delivery', 'Delivery'), ('signature', 'Signature'), ('adult_signature', 'adult_signature'),
-         ('direct_signature', 'direct_signature')], default="none",
+         ('direct_signature', 'direct_signature')], default="adult_signature",
         string='Shipstation Confirmation')
     store_id = fields.Many2one('shipstation.store.vts', "Store")
 
@@ -46,7 +61,8 @@ class DeliveryCarrier(models.Model):
 
     @api.multi
     def api_calling_function(self, url_data, body):
-        configuration = self.env['shipstation.odoo.configuration.vts'].search([], limit=1)
+        configuration = self.env['shipstation.odoo.configuration.vts'].search([
+        ], limit=1)
         if not configuration:
             raise ValidationError("Configuration Not Done.")
         url = configuration.making_shipstation_url(url_data)
@@ -60,7 +76,8 @@ class DeliveryCarrier(models.Model):
         data = json.dumps(body)
         _logger.info("Request Data: %s" % (data))
         try:
-            response_body = request(method='POST', url=url, data=data, headers=headers)
+            response_body = request(
+                method='POST', url=url, data=data, headers=headers)
         except Exception as e:
             raise ValidationError(e)
         return response_body
@@ -90,9 +107,9 @@ class DeliveryCarrier(models.Model):
         # https://ssapi.shipstation.com/shipments/getrates
         dict_rate = {
             "carrierCode": "%s" % (
-            self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id.code),
+                self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id.code),
             "serviceCode": "%s" % (
-            self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
+                self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
             "packageCode": "%s" % (self.delivery_package_id and self.delivery_package_id.package_code),
             "fromPostalCode": "%s" % (serder_address.zip),
             "toState": "%s" % (receiver_address.state_id and receiver_address.state_id.code),
@@ -109,12 +126,13 @@ class DeliveryCarrier(models.Model):
                 "width": self.delivery_package_id and self.delivery_package_id.width or 0.0,
                 "height": self.delivery_package_id and self.delivery_package_id.height or 0.0
             },
-            "confirmation": self.confirmation or "none",
+            "confirmation": self.confirmation or "adult_signature",
             "residential": self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.residential_address
         }
         try:
 
-            response_data = self.api_calling_function("/shipments/getrates", dict_rate)
+            response_data = self.api_calling_function(
+                "/shipments/getrates", dict_rate)
 
             if response_data.status_code == 200:
                 responses = response_data.json()
@@ -122,7 +140,8 @@ class DeliveryCarrier(models.Model):
                 for response in responses:
                     if self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code == response.get(
                             'serviceCode'):
-                        service_cost = response.get('shipmentCost') + response.get('otherCost')
+                        service_cost = response.get(
+                            'shipmentCost') + response.get('otherCost')
                         return {'success': True, 'price': float(service_cost or 0.0), 'error_message': False,
                                 'warning_message': False}
                     else:
@@ -132,7 +151,8 @@ class DeliveryCarrier(models.Model):
             else:
                 error_code = "%s" % (response_data.status_code)
                 error_message = response_data.reason
-                error_detail = {'error': error_code + " - " + error_message + " - "}
+                error_detail = {'error': error_code +
+                                " - " + error_message + " - "}
                 return {'success': False, 'price': 0.0, 'error_message': error_detail,
                         'warning_message': False}
         except Exception as e:
@@ -142,7 +162,8 @@ class DeliveryCarrier(models.Model):
     def generate_label_from_shipstation(self, picking):
         picking_receiver_id = picking.partner_id
         picking_sender_id = picking.picking_type_id.warehouse_id.partner_id
-        total_value = sum([(line.product_uom_qty * line.product_id.list_price) for line in picking.move_lines])
+        total_value = sum([(line.product_uom_qty * line.product_id.list_price)
+                           for line in picking.move_lines])
         weight = picking.shipping_weight
         pound_for_kg = 2.20462
         ounce_for_kg = 35.274
@@ -155,12 +176,12 @@ class DeliveryCarrier(models.Model):
             total_weight = weight
         request_data = {
             "carrierCode": "%s" % (
-            self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id.code),
+                self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id and self.shipstation_delivery_carrier_service_id.delivery_carrier_id.code),
             "serviceCode": "%s" % (
-            self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
+                self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
             "packageCode": "%s" % (self.delivery_package_id and self.delivery_package_id.package_code or ""),
-            "confirmation": self.confirmation or "none",
-            "shipDate": "%s" % (time.strftime("%Y-%m-%d")),
+            "confirmation": self.confirmation or "adult_signature",
+            "shipDate": "%s" % (date_by_adding_business_days(1)),
             "weight": {
                 "value": total_weight,
                 "units": self.weight_uom or "pounds",
@@ -208,9 +229,9 @@ class DeliveryCarrier(models.Model):
                 "sku": "%s" % (move_line.product_id and move_line.product_id.default_code),
                 "name": "%s" % (move_line.product_id and move_line.product_id.name),
                 "weight": {
-                            "value": "%s" % (move_line.product_id and move_line.product_id.weight),
-                            "units": self.weight_uom or "pounds"
-                          },
+                    "value": "%s" % (move_line.product_id and move_line.product_id.weight),
+                    "units": self.weight_uom or "pounds"
+                },
                 "quantity": int(move_line.product_uom_qty),
                 "unitPrice": "%s" % (move_line.product_id and move_line.product_id.lst_price),
                 "productId": "%s" % (move_line.product_id and move_line.product_id.id)}
@@ -222,7 +243,8 @@ class DeliveryCarrier(models.Model):
             raise ValidationError("Store Not Configured!")
         picking_receiver_id = picking.partner_id
         picking_sender_id = picking.picking_type_id.warehouse_id.partner_id
-        total_value = sum([(line.product_uom_qty * line.product_id.list_price) for line in picking.move_lines])
+        total_value = sum([(line.product_uom_qty * line.product_id.list_price)
+                           for line in picking.move_lines])
         weight = picking.shipping_weight
         pound_for_kg = 2.20462
         ounce_for_kg = 35.274
@@ -235,7 +257,8 @@ class DeliveryCarrier(models.Model):
             total_weight = weight
         date_order = picking.scheduled_date
         if date_order:
-            order_date_formate =datetime.strptime(str(date_order), "%Y-%m-%d %H:%M:%S")
+            order_date_formate = datetime.strptime(
+                str(date_order), "%Y-%m-%d %H:%M:%S")
             order_date = order_date_formate.strftime('%Y-%m-%dT%H:%M:%S')
             request_data = {
                 "orderNumber": "%s" % (picking.name),
@@ -273,9 +296,9 @@ class DeliveryCarrier(models.Model):
                 "shippingAmount": 0.0,
                 "carrierCode": "%s" % (self.shipstation_carrier_id and self.shipstation_carrier_id.code),
                 "serviceCode": "%s" % (
-                self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
+                    self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
                 "packageCode": "%s" % (self.delivery_package_id and self.delivery_package_id.package_code or ""),
-                "confirmation": self.confirmation or "none",
+                "confirmation": self.confirmation or "adult_signature",
                 "shipDate": "%s" % (order_date),
                 "weight": {
                     "value": total_weight,
@@ -309,7 +332,8 @@ class DeliveryCarrier(models.Model):
         for picking in pickings:
             body = self.create_or_update_order(picking)
             try:
-                response_data = self.api_calling_function("/orders/createorder", body)
+                response_data = self.api_calling_function(
+                    "/orders/createorder", body)
                 if response_data.status_code == 200:
                     responses = response_data.json()
                     _logger.info("Response Data: %s" % (responses))
@@ -322,9 +346,11 @@ class DeliveryCarrier(models.Model):
                 else:
                     error_code = "%s" % (response_data.status_code)
                     error_message = response_data.reason
-                    error_detail = {'error': error_code + " - " + error_message + " - "}
+                    error_detail = {'error': error_code +
+                                    " - " + error_message + " - "}
                     if response_data.json():
-                        error_detail = {'error': error_code + " - " + error_message + " - %s" % (response_data.json())}
+                        error_detail = {
+                            'error': error_code + " - " + error_message + " - %s" % (response_data.json())}
                     raise ValidationError(error_detail)
             except Exception as e:
                 raise ValidationError(e)
@@ -336,19 +362,23 @@ class DeliveryCarrier(models.Model):
             raise ValidationError("Shipstation Shipment Id Not Available!")
         req_data = {"shipmentId": shipment_id}
         try:
-            response_data = self.api_calling_function("/shipments/voidlabel", req_data)
+            response_data = self.api_calling_function(
+                "/shipments/voidlabel", req_data)
             if response_data.status_code == 200:
                 responses = response_data.json()
                 _logger.info("Response Data: %s" % (responses))
                 approved = responses.get('approved')
                 if approved:
-                    picking.message_post(body=_('Shipment Cancelled In Shipstation %s' % (shipment_id)))
+                    picking.message_post(
+                        body=_('Shipment Cancelled In Shipstation %s' % (shipment_id)))
             else:
                 error_code = "%s" % (response_data.status_code)
                 error_message = response_data.reason
-                error_detail = {'error': error_code + " - " + error_message + " - "}
+                error_detail = {'error': error_code +
+                                " - " + error_message + " - "}
                 if response_data.json():
-                    error_detail = {'error': error_code + " - " + error_message + " - %s" % (response_data.json())}
+                    error_detail = {'error': error_code + " - " +
+                                    error_message + " - %s" % (response_data.json())}
                 raise ValidationError(error_detail)
         except Exception as e:
             raise Warning(e)
@@ -357,7 +387,8 @@ class DeliveryCarrier(models.Model):
     def shipstation_get_tracking_link(self, pickings):
         res = ""
         for picking in pickings:
-            link = "%s"%(picking.carrier_id and picking.carrier_id.shipstation_carrier_id and picking.carrier_id and picking.carrier_id.shipstation_carrier_id.provider_tracking_link)
+            link = "%s" % (
+                picking.carrier_id and picking.carrier_id.shipstation_carrier_id and picking.carrier_id and picking.carrier_id.shipstation_carrier_id.provider_tracking_link)
             if not link:
                 raise ValidationError("Provider Link Is not available")
             res = '%s%s' % (link, picking.carrier_tracking_ref)
