@@ -271,7 +271,7 @@ class DeliveryCarrier(models.Model):
                     "name": "%s" % (picking_receiver_id.name),
                     "company": "",
                     "street1": "%s" % (picking_receiver_id.street),
-                    "street2": "%s" % (picking_receiver_id.street2),
+                    "street2": "%s" % (picking_receiver_id.street2 or ""),
                     "city": "%s" % (picking_receiver_id.city),
                     "state": "%s" % (picking_receiver_id.state_id and picking_receiver_id.state_id.code),
                     "postalCode": "%s" % (picking_receiver_id.zip),
@@ -283,7 +283,7 @@ class DeliveryCarrier(models.Model):
                     "name": "%s" % (picking_receiver_id.name),
                     "company": "",
                     "street1": "%s" % (picking_receiver_id.street),
-                    "street2": "%s" % (picking_receiver_id.street2),
+                    "street2": "%s" % (picking_receiver_id.street2 or ""),
                     "city": "%s" % (picking_receiver_id.city),
                     "state": "%s" % (picking_receiver_id.state_id and picking_receiver_id.state_id.code),
                     "postalCode": "%s" % (picking_receiver_id.zip),
@@ -299,7 +299,7 @@ class DeliveryCarrier(models.Model):
                     self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.service_code),
                 "packageCode": "%s" % (self.delivery_package_id and self.delivery_package_id.package_code or ""),
                 "confirmation": self.confirmation or "adult_signature",
-                "shipDate": "%s" % (order_date),
+                "shipDate": "%s" % (date_by_adding_business_days(1)),
                 "weight": {
                     "value": total_weight,
                     "units": "%s" % (self.weight_uom)
