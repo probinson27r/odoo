@@ -1,4 +1,0 @@
-[submodule "hibou-io/hibou-odoo-suite"]
-	path = hibou-io/hibou-odoo-suite
-	url = git@github.com:hibou-io/hibou-odoo-suite.git
-	branch = 12.0
