@@ -192,30 +192,6 @@ class DeliveryCarrier(models.Model):
                 "width": self.delivery_package_id and self.delivery_package_id.width or 0.0,
                 "height": self.delivery_package_id and self.delivery_package_id.height or 0.0
             },
-            "shipFrom": {
-                "name": "%s" % (picking_sender_id.name),
-                "company": "",
-                "street1": "%s" % (picking_sender_id.street or ""),
-                "street2": "%s" % (picking_sender_id.street2 or ""),
-                "city": "%s" % (picking_sender_id.city or ""),
-                "state": "%s" % (picking_sender_id.state_id and picking_sender_id.state_id.code or ""),
-                "postalCode": "%s" % (picking_sender_id.zip or ""),
-                "country": "%s" % (picking_sender_id.country_id and picking_sender_id.country_id.code or ""),
-                "phone": "%s" % (picking_sender_id.phone or ""),
-                "residential": self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.residential_address
-            },
-            "shipTo": {
-                "name": "%s" % (picking_receiver_id.name),
-                "company": "",
-                "street1": "%s" % (picking_receiver_id.street or ""),
-                "street2": "%s" % (picking_receiver_id.street2 or ""),
-                "city": "%s" % (picking_receiver_id.city or ""),
-                "state": "%s" % (picking_receiver_id.state_id and picking_receiver_id.state_id.code or ""),
-                "postalCode": "%s" % (picking_receiver_id.zip or ""),
-                "country": "%s" % (picking_receiver_id.country_id and picking_receiver_id.country_id.code or ""),
-                "phone": "%s" % (picking_receiver_id.phone or ""),
-                "residential": self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.residential_address
-            },
         }
         return request_data
 
