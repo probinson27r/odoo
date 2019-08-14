@@ -243,6 +243,10 @@ class DeliveryCarrier(models.Model):
             raise ValidationError("Store Not Configured!")
         picking_receiver_id = picking.partner_id
         picking_sender_id = picking.picking_type_id.warehouse_id.partner_id
+        receiver_nameid = picking_receiver_id.display_name
+        receiver_name_company = receiver_nameid.split(", ")
+        if len(receiver_name_company) == 1:
+            receiver_name_company.append('Attn: IT Department')
         total_value = sum([(line.product_uom_qty * line.product_id.list_price)
                            for line in picking.move_lines])
         weight = picking.shipping_weight
@@ -268,27 +272,27 @@ class DeliveryCarrier(models.Model):
                 "customerUsername": "%s" % (picking_receiver_id.name),
                 "customerEmail": "%s" % (picking_receiver_id.email),
                 "billTo": {
-                    "name": "%s" % (picking_receiver_id.name),
-                    "company": "",
+                    "name": "%s" % (receiver_name_company[1] or ""),
+                    "company": "%s" % (receiver_name_company[0] or ""),
                     "street1": "%s" % (picking_receiver_id.street),
                     "street2": "%s" % (picking_receiver_id.street2 or ""),
                     "city": "%s" % (picking_receiver_id.city),
                     "state": "%s" % (picking_receiver_id.state_id and picking_receiver_id.state_id.code),
                     "postalCode": "%s" % (picking_receiver_id.zip),
                     "country": "%s" % (picking_receiver_id.country_id and picking_receiver_id.country_id.code or ""),
-                    "phone": "%s" % (picking_receiver_id.phone),
+                    "phone": "%s" % (picking_receiver_id.phone or ""),
                     "residential": self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.residential_address
                 },
                 "shipTo": {
-                    "name": "%s" % (picking_receiver_id.name),
-                    "company": "",
+                    "name": "%s" % (receiver_name_company[1] or ""),
+                    "company": "%s" % (receiver_name_company[0] or ""),
                     "street1": "%s" % (picking_receiver_id.street),
                     "street2": "%s" % (picking_receiver_id.street2 or ""),
                     "city": "%s" % (picking_receiver_id.city),
                     "state": "%s" % (picking_receiver_id.state_id and picking_receiver_id.state_id.code),
                     "postalCode": "%s" % (picking_receiver_id.zip),
                     "country": "%s" % (picking_receiver_id.country_id and picking_receiver_id.country_id.code),
-                    "phone": "%s" % (picking_receiver_id.phone),
+                    "phone": "%s" % (picking_receiver_id.phone or ""),
                     "residential": self.shipstation_delivery_carrier_service_id and self.shipstation_delivery_carrier_service_id.residential_address
                 },
                 "items": self.get_order_item_details(picking),
