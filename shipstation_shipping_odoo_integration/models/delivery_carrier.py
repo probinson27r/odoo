@@ -210,7 +210,7 @@ class DeliveryCarrier(models.Model):
                 },
                 "quantity": int(move_line.product_uom_qty),
                 "unitPrice": "%s" % (move_line.product_id and move_line.product_id.lst_price),
-                "imageUrl": "https://www.familyzone.com/hubfs/fz19_assets/images/global/icons/icon_school_300.png"
+                "imageUrl": "https://www.familyzone.com/hubfs/fz19_assets/images/global/icons/icon_school_300.png",
                 "productId": "%s" % (move_line.product_id and move_line.product_id.id)}
             res.append(item_dict)
         return res
