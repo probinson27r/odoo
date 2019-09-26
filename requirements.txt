@@ -1,5 +1,6 @@
 holidays
 oauthlib
+requests_oauthlib
 sphinx
 sphinx_tabs
 sphinxcontrib-httpdomain
