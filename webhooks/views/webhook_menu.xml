@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <menuitem id="menu_webhook" name="Webhooks" sequence="100" groups="webhooks.group_webhook_user" parent="base.menu_automation" web_icon="webhooks,static/description/icon.png"/>
+
+        <menuitem id="menu_webhook_job" name="Jobs" parent="menu_webhook" action="action_webhook_job" sequence="1"/>
+
+        <menuitem id="menu_configuration" name="Configuration" parent="menu_webhook" sequence="2"/>
+
+        <menuitem id="menu_webhook_webhook" name="Webhooks" parent="menu_configuration" action="webhook_webhook_act" sequence="1"/>
+
+    </data>
+</odoo>

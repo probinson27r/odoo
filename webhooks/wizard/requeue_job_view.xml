@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <data>
+        <record id="view_requeue_job" model="ir.ui.view">
+            <field name="name">Requeue Jobs</field>
+            <field name="model">webhook.requeue.job</field>
+            <field name="arch" type="xml">
+                <form string="Requeue Jobs">
+                    <sheet>
+                        <group string="The selected jobs will be requeued.">
+                            <field name="job_ids" nolabel="1"/>
+                        </group>
+                        <footer>
+                            <button name="requeue" string="Requeue" type="object" class="oe_highlight"/>
+                            or
+                            <button string="Cancel" class="oe_link" special="cancel"/>
+                        </footer>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <record id="action_requeue_job" model="ir.actions.act_window">
+            <field name="name">Requeue Jobs</field>
+            <field name="type">ir.actions.act_window</field>
+            <field name="res_model">webhook.requeue.job</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">form</field>
+            <field name="view_id" ref="view_requeue_job"/>
+            <field name="target">new</field>
+        </record>
+
+        <act_window
+            id="action_requeue_job_values"
+            name="Requeue Jobs"
+            res_model="webhook.requeue.job"
+            target="new"
+            multi="True"
+            src_model="webhook.job"
+            view_mode="form"/>
+    </data>
+</odoo>
