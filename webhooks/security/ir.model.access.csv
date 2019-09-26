@@ -1,0 +1,15 @@
+id,name,model_id:id,group_id:id,perm_read,perm_write,perm_create,perm_unlink
+access_webhook_webhook_user,access.webhook.webhook.user,webhooks.model_webhook_webhook,webhooks.group_webhook_user,1,0,0,0
+access_action_rule,access.action.rule,base_automation.model_base_automation,webhooks.group_webhook_user,1,0,0,0
+access_action_server,access.action.server,base.model_ir_actions_server,webhooks.group_webhook_user,1,0,0,0
+access_webhook_job_user,access.webhook.job,webhooks.model_webhook_job,webhooks.group_webhook_user,1,1,1,1
+
+access_webhook_webhook_manager,access.webhook.webhook.manager,webhooks.model_webhook_webhook,webhooks.group_webhook_manager,1,1,1,1
+access_action_rule_manager,access.action.rule.manager,base_automation.model_base_automation,webhooks.group_webhook_manager,1,1,1,1
+access_action_server_manager,access.action.server.manager,base.model_ir_actions_server,webhooks.group_webhook_manager,1,1,1,1
+access_webhook_job_manager,access.webhook.job,webhooks.model_webhook_job,webhooks.group_webhook_manager,1,1,1,1
+
+access_webhook_webhook,access.webhook.webhook,webhooks.model_webhook_webhook,,1,1,1,1
+access_action_rule,access.action.rule,base_automation.model_base_automation,,1,1,1,1
+access_action_server,access.action.server,base.model_ir_actions_server,,1,1,1,1
+access_ir_cron,access.ir.cron,base.model_ir_cron,,1,1,1,1

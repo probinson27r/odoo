@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+        <record model="ir.ui.view" id="view_server_action_form_inherit">
+            <field name="name">Server Action</field>
+            <field name="model">ir.actions.server</field>
+            <field name="inherit_id" ref="base.view_server_action_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//notebook/page[@name='code']" position="after">
+                   <page string="HTTP Callback" name='webhook' autofocus="autofocus" attrs="{'invisible': [('state', '!=', 'webhook')]}">
+                        <group>
+                            <group>
+                                <field name="lang_id" attrs="{'required': [('state', '==', 'webhook')]}"/>
+                            </group>
+                            <group>
+                                <field name="format" stirng="Format" attrs="{'required': [('state', '==', 'webhook')]}"/>
+                                <field name="auth_id" attrs="{'required': [('state', '==', 'webhook')]}" string="Secret"/>
+                            </group>
+                        </group>
+                        <group>
+                            <field name="address" string="Callback URL" attrs="{'required': [('state', '==', 'webhook')]}"/>
+                            <field name="max_retries" attrs="{'required': [('state', '==', 'webhook')]}"/>
+                            <field name="field_ids" invisible="1"/>
+                        </group>
+                    </page>
+               </xpath>
+            </field>
+        </record>
+
+        <record id="view_webhook_webhook_form" model="ir.ui.view">
+            <field name="name">Webhook</field>
+            <field name="model">webhook.webhook</field>
+            <field name="arch" type="xml">
+                <form string="Action Rule">
+                    <header>
+                        <button string="Send Test Notification" type="object" icon="fa-exchange" name="test_notification"/>
+                    </header>
+                    <sheet>
+                        <div class="oe_button_box" name="button_box" style="width:800px">
+                            <button name="toggle_active" type="object" class="oe_stat_button" icon="fa-archive">
+                                <field name="active" widget="boolean_button" options='{"terminology": "archive"}'/>
+                            </button>
+                            <button name="display_jobs" type="object" class="oe_stat_button" icon="fa-bars" string="Jobs"/>
+                        </div>
+                        <label for="name" class="oe_edit_only" string="Name"/>
+                        <h1><field name="name"/></h1>
+                        <group>
+                            <group>
+                                <field name="auth_id" required="1" string="Secret"/>
+                                <field name="model_id" string="Model" attrs="{'readonly': [('id','!=',False)]}"/>
+                                <field name="format" string="Format"/>
+                                <field name="model_name" invisible="1"/>
+                                <field name="id" invisible="1"/>
+                            </group>
+                            <group>
+                                <field name="address" string="Callback URL"/>
+                                <field name="lang_id"/>
+                                <field name="field_ids" domain="[('model_id', '=', model_id)]" widget="many2many_tags"/>
+                            </group>
+                        </group>
+                        <notebook>
+                            <page string="Event and Condition">
+                                <group attrs="{'invisible': [('model_id', '!=', False)]}">
+                                    <p><b>Please choose the document type before setting the conditions.</b></p>
+                                </group>
+                                <group attrs="{'invisible': [('model_id', '=', False)]}">
+                                    <field name="trigger" invisible="1"/>
+                                    <field name="webhook_trigger" required="1" string="Event" attrs="{'readonly': [('id','!=',False)]}"/>
+                                    <field name="filter_domain" widget="domain" options="{'model': 'model_name', 'in_dialog': True}" string="Condition"/>
+                                </group>
+                            </page>
+                        </notebook>
+                    </sheet>
+                </form>
+            </field>
+        </record>
+
+        <!-- Action Rule Tree View -->
+        <record id="view_webhook_webhook_tree" model="ir.ui.view">
+            <field name="name">Webhooks</field>
+            <field name="model">webhook.webhook</field>
+            <field name="arch" type="xml">
+                <tree string="Action Rule">
+                    <field name="name" string="Name"/>
+                    <field name="model_id" string="Model"/>
+                    <field name="address" string="Callback URL"/>
+                    <field name="format"/>
+                    <field name="lang_id"/>
+                    <field name="trigger" string="Event"/>
+                    <button name="test_notification" type="object" string="Send Test Notification"/>
+                </tree>
+            </field>
+        </record>
+
+        <!-- Action Rule Search View -->
+        <record id="view_webhook_webhook_search" model="ir.ui.view">
+            <field name="name">Search-Webhooks</field>
+            <field name="model">webhook.webhook</field>
+            <field name="arch" type="xml">
+                <search string="Search Webhooks">
+                    <field name="name" string="Name" filter_domain="['|',('name','ilike',self),('trigger','ilike',self)]"/>
+                    <separator />
+                    <filter string="Active" name="active"
+                            domain="[('active','=', True)]"/>
+                    <filter string="InActive" name="active"
+                            domain="[('active','=', False)]"/>
+                    <separator />
+                    <group expand="0" string="Group By">
+                        <filter string="Event" name="groupby_kind" domain="[]" context="{'group_by':'trigger'}"/>
+                        <filter name="groupby_model" string="Model" domain="[]" context="{'group_by':'model_id'}"/>
+                    </group>
+                </search>
+            </field>
+        </record>
+
+
+        <!-- Action Rule Action -->
+        <record id="webhook_webhook_act" model="ir.actions.act_window">
+            <field name="name">Webhooks</field>
+            <field name="res_model">webhook.webhook</field>
+            <field name="view_type">form</field>
+            <field name="view_mode">tree,form</field>
+            <field name="view_id" ref="webhooks.view_webhook_webhook_tree"/>
+            <field name="help" type="html">
+              <p class="oe_view_nocontent_create">
+                You can subscribe to events for your products, orders etc. by creating webhooks that will push XML or JSON notifications to a given URL.
+              </p><p>
+              </p>
+            </field>
+        </record>
+
+        <record id="view_users_form_simple_modif" model="ir.ui.view">
+            <field name="name">res.users.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form_simple_modif"/>
+            <field name="arch" type="xml">
+                <xpath expr="//h1" position="before">
+                    <button string="Webhooks" type="action" icon="fa-bars" name="%(webhooks.webhook_webhook_act)d"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="view_users_form" model="ir.ui.view">
+            <field name="name">res.users.form</field>
+            <field name="model">res.users</field>
+            <field name="inherit_id" ref="base.view_users_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//button[@name='toggle_active']" position="after">
+                    <button string="Webhooks" type="action" class="oe_stat_button" icon="fa-bars" name="%(webhooks.webhook_webhook_act)d"/>
+                </xpath>
+            </field>
+        </record>
+
+        <record id="base_automation.base_automation_act" model="ir.actions.act_window">
+            <field name="domain">[('is_automated_action', '=', True)]</field>
+        </record>
+
+        <record id="webhooks.res_config_settings_view_form" model="ir.ui.view">
+            <field name="name">res.config.settings.view.form.inherit.webhook</field>
+            <field name="model">res.config.settings</field>
+            <field name="inherit_id" ref="base_setup.res_config_settings_view_form"/>
+            <field name="arch" type="xml">
+                <xpath expr="//div[@id='multi_company']" position="after">
+                    <h2 groups="base.group_no_one">Webhook Configurations</h2>
+                    <div class="row mt16 o_settings_container" id="webhook_config" groups="base.group_no_one">
+                        <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <label string="Max. Retries" for="max_retries"/>
+                                <field name="max_retries"/>
+                            </div>
+                        </div>
+                        <div class="col-xs-12 col-md-6 o_setting_box">
+                            <div class="o_setting_left_pane"/>
+                            <div class="o_setting_right_pane">
+                                <label string="Timeout" for="timeout"/>
+                                <field name="timeout"/>
+                            </div>
+                        </div>
+                    </div>
+                </xpath>
+            </field>
+        </record>
+</odoo>
